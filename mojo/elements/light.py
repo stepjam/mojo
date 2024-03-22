@@ -53,6 +53,9 @@ class Light(MujocoElement):
         self.mjcf.active = value
         self._mojo.physics.bind(self.mjcf).active = value
 
+    def is_active(self) -> bool:
+        return self.mjcf.active == "true"
+
     def set_position(self, position: np.ndarray):
         self._mojo.physics.bind(self.mjcf).pos = position
         self.mjcf.pos = position
@@ -82,7 +85,7 @@ class Light(MujocoElement):
         return self.mjcf.specular
 
     def set_direction(self, direction: np.ndarray):
-        self.mjcf.dur = direction
+        self.mjcf.dir = direction
         self._mojo.physics.bind(self.mjcf).dir = direction
 
     def get_direction(self) -> np.ndarray:
