@@ -17,3 +17,9 @@ class MujocoElement(ABC):
     @property
     def mjcf(self):
         return self._mjcf_elem
+
+    def __eq__(self, other):
+        return (
+            isinstance(other, MujocoElement)
+            and self.mjcf.full_identifier == other.mjcf.full_identifier
+        )
