@@ -17,3 +17,8 @@ class TextureMapping(Enum):
     PLANAR = "2d"
     CUBE = "cube"
     SKYBOX = "skybox"
+
+
+class LightType(Enum):
+    DIRECTIONAL = "directional"
+    SPOTLIGHT = "spotlight"

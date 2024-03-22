@@ -1,4 +1,5 @@
 import mujoco.viewer
+import numpy as np
 from dm_control import mjcf
 
 from mojo.elements.body import Body
@@ -90,6 +91,22 @@ class Mojo:
         attached_model_mjcf = attach_site.attach(model_mjcf)
         self.mark_dirty()
         return Body(self, attached_model_mjcf)
+
+    def set_headlight(
+        self,
+        active: bool = True,
+        ambient: np.ndarray = None,
+        diffuse: np.ndarray = None,
+        specular: np.ndarray = None,
+    ):
+        ambient = np.array([0.1, 0.1, 0.1]) if ambient is None else ambient
+        diffuse = np.array([0.4, 0.4, 0.4]) if diffuse is None else diffuse
+        specular = np.array([0.5, 0.5, 0.5]) if specular is None else specular
+        self.root_element.mjcf.visual.headlight.ambient = ambient
+        self.root_element.mjcf.visual.headlight.diffuse = diffuse
+        self.root_element.mjcf.visual.headlight.specular = specular
+        self.root_element.mjcf.visual.headlight.active = active
+        self.mark_dirty()
 
     def __str__(self):
         return self.root_element.mjcf.to_xml_string()
