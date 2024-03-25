@@ -77,9 +77,10 @@ class Mojo:
         self._dirty = True
 
     def step(self):
+        """Advances the physics state by 1 step."""
         if self._dirty:
             self._create_physics_from_model()
-        pass
+        self._physics.step()
 
     def get_material(self, path: str) -> mjcf.Element:
         return self._texture_store.get(path, None)
