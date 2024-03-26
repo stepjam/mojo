@@ -46,6 +46,7 @@ class Mojo:
         self.root_element.mjcf.compiler.lengthrange.timestep = timestep
 
     def launch_viewer(self, passive: bool = False) -> None:
+        # passive viewer does not step.
         if self._dirty:
             self._create_physics_from_model()
         if passive:
@@ -80,7 +81,7 @@ class Mojo:
         """Advances the physics state by 1 step."""
         if self._dirty:
             self._create_physics_from_model()
-        self._physics.step()
+        self.physics.step()
 
     def get_material(self, path: str) -> mjcf.Element:
         return self._texture_store.get(path, None)
@@ -94,12 +95,12 @@ class Mojo:
         parent: MujocoElement = None,
         on_loaded: Optional[Callable[[mjcf.RootElement], None]] = None,
     ):
-        """Load a Mujoco model from the xml file and attach it to the specified parent element.
+        """Load a Mujoco model from xml file and attach to specified parent element.
 
         :param path: The file path to the Mujoco model XML file.
-        :param parent: The parent MujocoElement to which the loaded model will be attached.
+        :param parent: Parent MujocoElement to which the loaded model will be attached.
         If None, it attaches to the root element.
-        :param on_loaded: An optional callback function to be executed after the model is loaded.
+        :param on_loaded: Optional callback to be executed after model is loaded.
         Use it to customize the Mujoco model before attaching it to the parent.
         :return: A Body element representing the attached model.
         """

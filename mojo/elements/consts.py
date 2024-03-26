@@ -22,3 +22,10 @@ class TextureMapping(Enum):
 class LightType(Enum):
     DIRECTIONAL = "directional"
     SPOTLIGHT = "spotlight"
+
+
+class JointType(Enum):
+    FREE = "free"
+    BALL = "ball"
+    SLIDE = "slide"
+    HINGE = "hinge"

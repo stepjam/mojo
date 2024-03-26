@@ -5,6 +5,32 @@ from dm_control import mjcf
 
 from mojo.elements.consts import TextureMapping
 
+# Default minimum distance between two geoms for them to be considered in collision.
+_DEFAULT_COLLISION_MARGIN: float = 1e-8
+
+
+def has_collision(
+    physics,
+    collision_geom_id_1: int,
+    collision_geom_id_2: int,
+    margin: float = _DEFAULT_COLLISION_MARGIN,
+) -> bool:
+    """Check collision between two objects by geometry id."""
+    for contact in physics.data.contact:
+        if contact.dist > margin:
+            continue
+
+        if (
+            contact.geom1 == collision_geom_id_1
+            and contact.geom2 == collision_geom_id_2
+        ) or (
+            contact.geom2 == collision_geom_id_1
+            and contact.geom1 == collision_geom_id_2
+        ):
+            return True
+
+    return False
+
 
 def load_texture(
     mjcf_model: mjcf.RootElement,

@@ -3,18 +3,30 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import numpy as np
+from mujoco_utils import mjcf_utils
 from typing_extensions import Self
 
 from mojo.elements import body
 from mojo.elements.consts import GeomType, TextureMapping
 from mojo.elements.element import MujocoElement
-from mojo.elements.utils import load_texture
+from mojo.elements.utils import has_collision, load_texture
 
 if TYPE_CHECKING:
     from mojo import Mojo
+    from mojo.elements.body import Body
 
 
 class Geom(MujocoElement):
+    @staticmethod
+    def get(
+        mojo: Mojo,
+        name: str,
+        parent: MujocoElement = None,
+    ) -> Self:
+        root_mjcf = mojo.root_element.mjcf if parent is None else parent.mjcf
+        mjcf = mjcf_utils.safe_find(root_mjcf, "geom", name)
+        return Geom(mojo, mjcf)
+
     @staticmethod
     def create(
         mojo: Mojo,
@@ -40,6 +52,13 @@ class Geom(MujocoElement):
         )
         mojo.mark_dirty()
         return Geom(mojo, new_geom)
+
+    @property
+    def parent(self) -> "Body":
+        # Have to do this due to circular import
+        from mojo.elements.body import Body
+
+        return Body(self._mojo, self.mjcf.parent)
 
     def set_position(self, position: np.ndarray):
         position = np.array(position)  # ensure is numpy array
@@ -92,3 +111,23 @@ class Geom(MujocoElement):
             # Have a default white color for texture
             self.set_color(np.ones(4))
         self._mojo.mark_dirty()
+
+    def set_collidable(self, value: bool):
+        self.mjcf.contype = int(value)
+        self.mjcf.conaffinity = int(value)
+        self._mojo.physics.bind(self.mjcf).contype = int(value)
+        self._mojo.physics.bind(self.mjcf).conaffinity = int(value)
+
+    def is_collidable(self) -> bool:
+        return (
+            self._mojo.physics.bind(self.mjcf).contype == 1
+            and self._mojo.physics.bind(self.mjcf).conaffinity == 1
+        )
+
+    def has_collided(self, other: Geom = None):
+        # If None, return true if there is any contact
+        if other is None:
+            return len(self._mojo.physics.data.contact) > 0
+        this_object_id = self._mojo.physics.bind(self.mjcf).element_id
+        other_object_id = self._mojo.physics.bind(other.mjcf).element_id
+        return has_collision(self._mojo.physics, other_object_id, this_object_id)

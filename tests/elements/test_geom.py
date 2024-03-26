@@ -5,7 +5,7 @@ import pytest
 from numpy.testing import assert_array_equal
 
 from mojo import Mojo
-from mojo.elements import Geom
+from mojo.elements import Body, Geom
 
 
 @pytest.fixture()
@@ -35,3 +35,27 @@ def test_set_texture(mojo: Mojo, geom: Geom):
     geom.set_texture(
         str(Path(__file__).parents[1] / "assets" / "textures" / "texture00.png")
     )
+
+
+def test_get_parent(mojo: Mojo, geom: Geom):
+    assert geom.parent is not None
+
+
+def test_get_set_collidable(mojo: Mojo, geom: Geom):
+    geom.set_collidable(True)
+    assert geom.is_collidable()
+    geom.set_collidable(False)
+    assert not geom.is_collidable()
+
+
+def test_has_collided(mojo: Mojo):
+    body0 = Body.create(mojo)
+    body1 = Body.create(mojo)
+    body2 = Body.create(mojo, position=np.array([1, 1, 1]))
+    body1.set_kinematic(True)
+    body2.set_kinematic(True)
+    geom0 = Geom.create(mojo, body0)
+    geom1 = Geom.create(mojo, body1)
+    geom2 = Geom.create(mojo, body2)
+    assert not geom0.has_collided(geom2)
+    assert geom0.has_collided(geom1)

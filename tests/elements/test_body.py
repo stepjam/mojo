@@ -34,3 +34,14 @@ def test_get_set_quaternion(mojo: Mojo, body: Body):
     expected = np.array([0, 1, 0, 0])
     body.set_quaternion(expected)
     assert_array_equal(body.get_quaternion(), expected)
+
+
+def test_get_set_kinematic(mojo: Mojo, body: Body):
+    body.set_position(np.array([1, 1, 1]))
+    body.set_kinematic(True)
+    Geom.create(mojo, parent=body)
+    assert body.is_kinematic()
+    before = body.get_position()
+    mojo.step()  # Objects should fall
+    after = body.get_position()
+    assert np.any(np.not_equal(before, after))
