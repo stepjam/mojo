@@ -4,6 +4,7 @@ import warnings
 from typing import TYPE_CHECKING
 
 import numpy as np
+import quaternion
 from mujoco_utils import mjcf_utils
 from typing_extensions import Self
 
@@ -77,6 +78,13 @@ class Body(MujocoElement):
             return self._mojo.physics.bind(self.mjcf.freejoint).qpos[3:].copy()
         return self._mojo.physics.bind(self.mjcf).quat.copy()
 
+    def set_euler(self, euler: np.ndarray):
+        self.set_quaternion(
+            quaternion.as_float_array(
+                quaternion.from_euler_angles(euler[0], euler[1], euler[2])
+            )
+        )
+
     def set_color(self, color: np.ndarray):
         for b in self.geoms:
             b.set_color(color)
@@ -101,7 +109,7 @@ class Body(MujocoElement):
         return len(self.geoms) > 0 and self.geoms[0].is_collidable()
 
     def has_collided(self, other: Body = None):
-        if not other.is_kinematic() and not self.is_kinematic():
+        if other is not None and (not other.is_kinematic() and not self.is_kinematic()):
             warnings.warn("You are checking collisions of two non-kinematic bodies.")
         # If None, return true if there is any contact
         if other is None:

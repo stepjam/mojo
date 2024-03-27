@@ -24,6 +24,12 @@ def test_get_set_position(mojo: Mojo, geom: Geom):
     assert_array_equal(geom.get_position(), expected)
 
 
+def test_get_set_quaternion(mojo: Mojo, geom: Geom):
+    expected = np.array([0, 1, 0, 0])
+    geom.set_quaternion(expected)
+    assert_array_equal(geom.get_quaternion(), expected)
+
+
 def test_get_set_color(mojo: Mojo, geom: Geom):
     expected = np.array([0.8, 0.8, 0.8, 1.0], dtype=np.float32)
     geom.set_color(expected)
@@ -35,6 +41,11 @@ def test_set_texture(mojo: Mojo, geom: Geom):
     geom.set_texture(
         str(Path(__file__).parents[1] / "assets" / "textures" / "texture00.png")
     )
+
+
+def test_set_mesh(mojo: Mojo, geom: Geom):
+    # just test that there are no exceptions
+    geom.set_mesh(str(Path(__file__).parents[1] / "assets" / "models" / "mug.obj"))
 
 
 def test_get_parent(mojo: Mojo, geom: Geom):
@@ -59,3 +70,13 @@ def test_has_collided(mojo: Mojo):
     geom2 = Geom.create(mojo, body2)
     assert not geom0.has_collided(geom2)
     assert geom0.has_collided(geom1)
+
+
+def test_get_set_kinematic(mojo: Mojo, geom: Geom):
+    geom.set_position(np.array([1, 1, 1]))
+    geom.set_kinematic(True)
+    assert geom.is_kinematic()
+    before = geom.get_position()
+    mojo.step()  # Objects should fall
+    after = geom.get_position()
+    assert np.any(np.not_equal(before, after))

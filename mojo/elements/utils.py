@@ -46,13 +46,13 @@ def load_texture(
 ) -> mjcf.Element:
     tex_repeat = np.array([1, 1]) if tex_repeat is None else tex_repeat
     color = np.array([1, 1, 1, 1]) if color is None else color
-    uid = str(uuid.uuid4())
+    name = f"{uuid.uuid4()}_{mapping.value}"
     texture = mjcf_model.asset.add(
-        "texture", name=f"texture_{uid}", file=path, type=mapping.value
+        "texture", name=f"texture_{name}", file=path, type=mapping.value
     )
     material = mjcf_model.asset.add(
         "material",
-        name=f"material_{uid}",
+        name=f"material_{name}",
         texture=texture,
         texrepeat=tex_repeat,
         texuniform=str(tex_uniform).lower(),
@@ -63,3 +63,12 @@ def load_texture(
         rgba=color,
     )
     return material
+
+
+def load_mesh(
+    mjcf_model: mjcf.RootElement, path: str, scale: np.ndarray
+) -> mjcf.Element:
+    scale = np.array([1, 1, 1]) if scale is None else scale
+    uid = str(uuid.uuid4())
+    mesh = mjcf_model.asset.add("mesh", name=f"mesh_{uid}", file=path, scale=scale)
+    return mesh

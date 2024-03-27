@@ -19,7 +19,13 @@ def get_version(rel_path):
         raise RuntimeError("Unable to find version string.")
 
 
-core_requirements = ["mujoco", "numpy", "dm_control", "mujoco_utils"]
+core_requirements = [
+    "mujoco",
+    "numpy",
+    "dm_control",
+    "mujoco_utils",
+    "numpy-quaternion",
+]
 
 setuptools.setup(
     version=get_version("mojo/__init__.py"),

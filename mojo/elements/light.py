@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import numpy as np
+from mujoco_utils import mjcf_utils
 from typing_extensions import Self
 
 from mojo.elements import Body
@@ -14,6 +15,16 @@ if TYPE_CHECKING:
 
 
 class Light(MujocoElement):
+    @staticmethod
+    def get(
+        mojo: Mojo,
+        name: str,
+        parent: MujocoElement = None,
+    ) -> Self:
+        root_mjcf = mojo.root_element.mjcf if parent is None else parent.mjcf
+        mjcf = mjcf_utils.safe_find(root_mjcf, "light", name)
+        return Light(mojo, mjcf)
+
     @staticmethod
     def create(
         mojo: Mojo,

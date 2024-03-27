@@ -14,6 +14,7 @@ class Mojo:
         model_mjcf = mjcf.from_path(base_model_path)
         self.root_element = MujocoModel(self, model_mjcf)
         self._texture_store: dict[str, mjcf.Element] = {}
+        self._mesh_store: dict[str, mjcf.Element] = {}
         self._dirty = True
         self._passive_dirty = False
         self._passive_viewer_handle = None
@@ -88,6 +89,12 @@ class Mojo:
 
     def store_material(self, path: str, material_mjcf: mjcf.Element) -> mjcf.Element:
         self._texture_store[path] = material_mjcf
+
+    def get_mesh(self, path: str) -> mjcf.Element:
+        return self._mesh_store.get(path, None)
+
+    def store_mesh(self, path: str, mesh_mjcf: mjcf.Element) -> mjcf.Element:
+        self._mesh_store[path] = mesh_mjcf
 
     def load_model(
         self,
