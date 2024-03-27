@@ -3,6 +3,7 @@ from __future__ import annotations
 import warnings
 from typing import TYPE_CHECKING
 
+import mujoco
 import numpy as np
 from mujoco_utils import mjcf_utils
 from typing_extensions import Self
@@ -91,20 +92,24 @@ class Geom(MujocoElement):
     def get_position(self) -> np.ndarray:
         if self.mjcf.parent.freejoint:
             return self._mojo.physics.bind(self.mjcf.parent.freejoint).qpos[:3].copy()
-        return self._mojo.physics.bind(self.mjcf).pos
+        return self._mojo.physics.bind(self.mjcf).xpos
 
     def set_quaternion(self, quaternion: np.ndarray):
         # wxyz
         quaternion = np.array(quaternion)  # ensure is numpy array
         if self.mjcf.parent.freejoint is not None:
             self._mojo.physics.bind(self.mjcf.parent.freejoint).qpos[3:] = quaternion
-        self._mojo.physics.bind(self.mjcf).quat = quaternion
+        mat = np.zeros(9)
+        mujoco.mju_quat2Mat(mat, quaternion)
+        self._mojo.physics.bind(self.mjcf).xmat = mat
         self.mjcf.quat = quaternion
 
     def get_quaternion(self) -> np.ndarray:
         if self.mjcf.parent.freejoint is not None:
             return self._mojo.physics.bind(self.mjcf.parent.freejoint).qpos[3:].copy()
-        return self._mojo.physics.bind(self.mjcf).quat.copy()
+        quat = np.zeros(4)
+        mujoco.mju_mat2Quat(quat, self._mojo.physics.bind(self.mjcf).xmat)
+        return quat
 
     def set_color(self, color: np.ndarray):
         color = np.array(color)
