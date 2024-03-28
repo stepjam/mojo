@@ -47,7 +47,7 @@ class Light(MujocoElement):
         parent_mjcf = (
             mojo.root_element.mjcf.worldbody if parent is None else parent.mjcf
         )
-        new_geom = parent_mjcf.add(
+        new_light = parent_mjcf.add(
             "light",
             pos=position,
             dir=direction,
@@ -58,7 +58,7 @@ class Light(MujocoElement):
             specular=specular,
         )
         mojo.mark_dirty()
-        return Light(mojo, new_geom)
+        return Light(mojo, new_light)
 
     def set_active(self, value: bool):
         self.mjcf.active = value

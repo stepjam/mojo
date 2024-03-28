@@ -5,8 +5,8 @@ import pytest
 from numpy.testing import assert_array_equal
 
 from mojo import Mojo
+from mojo.elements import Light
 from mojo.elements.consts import LightType
-from mojo.elements.light import Light
 
 
 @pytest.fixture()
