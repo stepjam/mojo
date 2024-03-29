@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import mujoco
 import numpy as np
 from mujoco_utils import mjcf_utils
 from typing_extensions import Self
@@ -59,7 +60,20 @@ class Camera(MujocoElement):
         self.mjcf.pos = position
 
     def get_position(self) -> np.ndarray:
-        return self._mojo.physics.bind(self.mjcf).pos
+        return self._mojo.physics.bind(self.mjcf).pos.copy()
+
+    def set_quaternion(self, quaternion: np.ndarray):
+        # wxyz
+        quaternion = np.array(quaternion)  # ensure is numpy array
+        mat = np.zeros(9)
+        mujoco.mju_quat2Mat(mat, quaternion)
+        self._mojo.physics.bind(self.mjcf).xmat = mat
+        self.mjcf.quat = quaternion
+
+    def get_quaternion(self) -> np.ndarray:
+        quat = np.zeros(4)
+        mujoco.mju_mat2Quat(quat, self._mojo.physics.bind(self.mjcf).xmat)
+        return quat
 
     def set_focal(self, focal: np.ndarray):
         if self.mjcf.sensorsize is None:
@@ -73,15 +87,28 @@ class Camera(MujocoElement):
         return self.mjcf.focal
 
     def set_sensor_size(self, sensor_size: np.ndarray):
-        if self.mjcf.focal is None:
+        # Either focal or focalpixel must be set
+        if self.mjcf.focal is None or self.mjcf.focalpixel is None:
             self.mjcf.focal = np.array([0, 0])
+        # Resolution must be set
         if self.mjcf.resolution is None:
             self.mjcf.resolution = np.array([1, 1])
-        self.mjcf.sensorsize = sensor_size
+        self.mjcf.sensorsize = np.array(sensor_size)
         self._mojo.mark_dirty()
 
     def get_sensor_size(self) -> np.ndarray:
         return self.mjcf.sensorsize
+
+    def set_focal_pixel(self, focal_pixel: np.ndarray):
+        if self.mjcf.sensorsize is None:
+            self.mjcf.sensorsize = np.array([0, 0])
+        if self.mjcf.resolution is None:
+            self.mjcf.resolution = np.array([1, 1])
+        self.mjcf.focalpixel = focal_pixel
+        self._mojo.mark_dirty()
+
+    def get_focal_pixel(self) -> np.ndarray:
+        return self.mjcf.focalpixel
 
     def set_fovy(self, fovy: float):
         self.mjcf.fovy = fovy
