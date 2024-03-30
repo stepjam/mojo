@@ -44,7 +44,7 @@ class Mojo:
         return self._physics.data.ptr
 
     def set_timestep(self, timestep: float):
-        self.root_element.mjcf.compiler.lengthrange.timestep = timestep
+        self.root_element.mjcf.option.timestep = timestep
 
     def launch_viewer(self, passive: bool = False) -> None:
         # passive viewer does not step.
