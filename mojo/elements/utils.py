@@ -1,4 +1,7 @@
 import uuid
+import warnings
+from collections import OrderedDict
+from typing import Optional
 
 import numpy as np
 from dm_control import mjcf
@@ -72,3 +75,41 @@ def load_mesh(
     uid = str(uuid.uuid4())
     mesh = mjcf_model.asset.add("mesh", name=f"mesh_{uid}", file=path, scale=scale)
     return mesh
+
+
+class AssetStore:
+    """Container for Mujoco assets."""
+
+    DEFAULT_CAPACITY = 32
+
+    def __init__(self, capacity: Optional[int] = None):
+        self._store: OrderedDict[str, mjcf.Element] = OrderedDict()
+        self._capacity = capacity
+
+    def get(self, path: str) -> Optional[mjcf.Element]:
+        """Get MJCF asset by path."""
+        return self._store.get(path, None)
+
+    def remove(self, path: str) -> None:
+        """Remove MJCF asset by path."""
+        if path in self._store:
+            asset = self._store.pop(path)
+            self._unload_asset(asset)
+
+    def add(self, path: str, asset_mjcf: mjcf.Element) -> None:
+        """Add new MJCF asset."""
+        self._store[path] = asset_mjcf
+        if self._capacity and len(self._store) > self._capacity:
+            warnings.warn(
+                f"The capacity of the store ({self._capacity}) has been exceeded."
+                f"Removing the oldest asset.",
+                UserWarning,
+            )
+            _, asset = self._store.popitem(last=False)
+            self._unload_asset(asset)
+
+    @staticmethod
+    def _unload_asset(asset: mjcf.Element) -> None:
+        if asset.tag == "material":
+            asset.texture.remove()
+        asset.remove()

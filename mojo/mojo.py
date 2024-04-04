@@ -7,14 +7,21 @@ from dm_control import mjcf
 from mojo.elements.body import Body
 from mojo.elements.element import MujocoElement
 from mojo.elements.model import MujocoModel
+from mojo.elements.utils import AssetStore
 
 
 class Mojo:
-    def __init__(self, base_model_path: str, timestep: float = 0.01):
+    def __init__(
+        self,
+        base_model_path: str,
+        timestep: float = 0.01,
+        texture_store_capacity: int = AssetStore.DEFAULT_CAPACITY,
+        mesh_store_capacity: int = AssetStore.DEFAULT_CAPACITY,
+    ):
         model_mjcf = mjcf.from_path(base_model_path)
         self.root_element = MujocoModel(self, model_mjcf)
-        self._texture_store: dict[str, mjcf.Element] = {}
-        self._mesh_store: dict[str, mjcf.Element] = {}
+        self._texture_store: AssetStore = AssetStore(texture_store_capacity)
+        self._mesh_store: AssetStore = AssetStore(mesh_store_capacity)
         self._dirty = True
         self._passive_dirty = False
         self._passive_viewer_handle = None
@@ -84,17 +91,17 @@ class Mojo:
             self._create_physics_from_model()
         self.physics.step()
 
-    def get_material(self, path: str) -> mjcf.Element:
-        return self._texture_store.get(path, None)
+    def get_material(self, path: str) -> Optional[mjcf.Element]:
+        return self._texture_store.get(path)
 
-    def store_material(self, path: str, material_mjcf: mjcf.Element) -> mjcf.Element:
-        self._texture_store[path] = material_mjcf
+    def store_material(self, path: str, material_mjcf: mjcf.Element) -> None:
+        self._texture_store.add(path, material_mjcf)
 
-    def get_mesh(self, path: str) -> mjcf.Element:
-        return self._mesh_store.get(path, None)
+    def get_mesh(self, path: str) -> Optional[mjcf.Element]:
+        return self._mesh_store.get(path)
 
-    def store_mesh(self, path: str, mesh_mjcf: mjcf.Element) -> mjcf.Element:
-        self._mesh_store[path] = mesh_mjcf
+    def store_mesh(self, path: str, mesh_mjcf: mjcf.Element) -> None:
+        self._mesh_store.add(path, mesh_mjcf)
 
     def load_model(
         self,
