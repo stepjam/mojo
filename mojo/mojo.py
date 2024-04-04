@@ -95,13 +95,13 @@ class Mojo:
         return self._texture_store.get(path)
 
     def store_material(self, path: str, material_mjcf: mjcf.Element) -> None:
-        self._texture_store.store(path, material_mjcf)
+        self._texture_store.add(path, material_mjcf)
 
     def get_mesh(self, path: str) -> Optional[mjcf.Element]:
         return self._mesh_store.get(path)
 
     def store_mesh(self, path: str, mesh_mjcf: mjcf.Element) -> None:
-        self._mesh_store.store(path, mesh_mjcf)
+        self._mesh_store.add(path, mesh_mjcf)
 
     def load_model(
         self,

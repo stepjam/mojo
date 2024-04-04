@@ -96,7 +96,7 @@ class AssetStore:
             asset = self._store.pop(path)
             self._unload_asset(asset)
 
-    def store(self, path: str, asset_mjcf: mjcf.Element) -> None:
+    def add(self, path: str, asset_mjcf: mjcf.Element) -> None:
         """Add new MJCF asset."""
         self._store[path] = asset_mjcf
         if self._capacity and len(self._store) > self._capacity:
