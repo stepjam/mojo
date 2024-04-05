@@ -93,6 +93,16 @@ class Site(MujocoElement):
         mujoco.mju_mat2Quat(quat, self._mojo.physics.bind(self.mjcf).xmat)
         return quat
 
+    def set_matrix(self, matrix: np.ndarray):
+        assert matrix.shape == (3, 3)
+        self._mojo.physics.bind(self.mjcf).xmat = np.reshape(matrix, (9,))
+        quat = np.zeros(4)
+        mujoco.mju_mat2Quat(quat, self._mojo.physics.bind(self.mjcf).xmat)
+        self.mjcf.quat = quat
+
+    def get_matrix(self) -> np.ndarray:
+        return np.reshape(self._mojo.physics.bind(self.mjcf).xmat.copy(), (3, 3))
+
     def set_color(self, color: np.ndarray):
         color = np.array(color)
         if len(color) == 3:

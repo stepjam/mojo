@@ -30,6 +30,12 @@ def test_get_set_quaternion(mojo: Mojo, site: Site):
     assert_array_equal(site.get_quaternion(), expected)
 
 
+def test_get_set_matrix(mojo: Mojo, site: Site):
+    expected = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+    site.set_matrix(expected)
+    assert_array_equal(site.get_matrix(), expected)
+
+
 def test_get_set_color(mojo: Mojo, site: Site):
     expected = np.array([0.8, 0.8, 0.8, 1.0], dtype=np.float32)
     site.set_color(expected)
