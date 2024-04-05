@@ -5,3 +5,4 @@ from mojo.elements.geom import Geom
 from mojo.elements.joint import Joint
 from mojo.elements.light import Light
 from mojo.elements.model import MujocoModel
+from mojo.elements.site import Site

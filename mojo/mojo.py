@@ -122,7 +122,7 @@ class Mojo:
         model_mjcf = mjcf.from_path(path)
         if on_loaded is not None:
             on_loaded(model_mjcf)
-        attach_site = self.root_element.mjcf if parent is None else parent
+        attach_site = self.root_element.mjcf if parent is None else parent.mjcf
         attached_model_mjcf = attach_site.attach(model_mjcf)
         self.mark_dirty()
         return Body(self, attached_model_mjcf)

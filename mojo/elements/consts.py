@@ -13,6 +13,14 @@ class GeomType(Enum):
     SDF = "sdf"
 
 
+class SiteType(Enum):
+    SPHERE = "sphere"
+    CAPSULE = "capsule"
+    ELLIPSOID = "ellipsoid"
+    CYLINDER = "cylinder"
+    BOX = "box"
+
+
 class TextureMapping(Enum):
     PLANAR = "2d"
     CUBE = "cube"

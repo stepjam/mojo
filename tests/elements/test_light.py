@@ -34,6 +34,15 @@ def test_get_set_active(mojo, light):
     assert light.is_active() == expected
 
 
+def test_get_set_shadows(mojo, light):
+    expected = False
+    light.set_shadows(expected)
+    assert light.is_using_shadows() == expected
+    expected = True
+    light.set_shadows(expected)
+    assert light.is_using_shadows() == expected
+
+
 def test_get_set_ambient(mojo, light):
     expected = np.array([0.8, 0.8, 0.8])
     light.set_ambient(expected)

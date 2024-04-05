@@ -102,5 +102,12 @@ class Light(MujocoElement):
     def get_direction(self) -> np.ndarray:
         return self.mjcf.dir
 
+    def set_shadows(self, value: bool):
+        self.mjcf.castshadow = value
+        self._mojo.physics.bind(self.mjcf).castshadow = value
+
+    def is_using_shadows(self) -> bool:
+        return self.mjcf.castshadow == "true"
+
     def get_light_type(self) -> LightType:
         return LightType.DIRECTIONAL if self.mjcf.directional else LightType.SPOTLIGHT

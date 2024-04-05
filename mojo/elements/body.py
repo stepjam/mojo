@@ -8,7 +8,7 @@ import quaternion
 from mujoco_utils import mjcf_utils
 from typing_extensions import Self
 
-from mojo.elements import geom
+from mojo.elements import geom, joint
 from mojo.elements.element import MujocoElement
 from mojo.elements.utils import has_collision
 
@@ -52,6 +52,12 @@ class Body(MujocoElement):
         # Loop through all children
         geoms = self.mjcf.find_all("geom") or []
         return [geom.Geom(self._mojo, mjcf) for mjcf in geoms]
+
+    @property
+    def joints(self) -> list[joint.Joint]:
+        # Loop through all children
+        joints = self.mjcf.find_all("joint") or []
+        return [joint.Joint(self._mojo, mjcf) for mjcf in joints]
 
     def set_position(self, position: np.ndarray):
         position = np.array(position)  # ensure is numpy array

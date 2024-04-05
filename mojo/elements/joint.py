@@ -56,6 +56,11 @@ class Joint(MujocoElement):
         """Get current joint position."""
         return float(self._mojo.physics.bind(self.mjcf).qpos)
 
+    def set_joint_position(self, value: float):
+        self._mojo.physics.bind(self.mjcf).qpos *= 0
+        self._mojo.physics.bind(self.mjcf).qpos += value
+        self._mojo.mark_dirty()
+
     def get_joint_velocity(self) -> float:
         """Get current joint velocity."""
         return float(self._mojo.physics.bind(self.mjcf).qvel)
