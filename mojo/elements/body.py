@@ -59,13 +59,6 @@ class Body(MujocoElement):
         joints = self.mjcf.find_all("joint") or []
         return [joint.Joint(self._mojo, mjcf) for mjcf in joints]
 
-    def set_kinematic(self, value: bool):
-        if value and not self.is_kinematic():
-            self.mjcf.add("freejoint")
-            self._mojo.mark_dirty()
-        if not value and self.is_kinematic() and self.mjcf.freejoint is not None:
-            self.mjcf.freejoint.remove()
-
     def set_euler(self, euler: np.ndarray):
         self.set_quaternion(
             quaternion.as_float_array(

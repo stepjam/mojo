@@ -153,13 +153,6 @@ class Geom(MujocoElement):
             and self._mojo.physics.bind(self.mjcf).conaffinity == 1
         )
 
-    def set_kinematic(self, value: bool):
-        if value and not self.is_kinematic():
-            self.mjcf.parent.add("freejoint")
-            self._mojo.mark_dirty()
-        if not value and self.is_kinematic() and self.mjcf.parent.freejoint is not None:
-            self.mjcf.parent.freejoint.remove()
-
     def has_collided(self, other: Geom = None):
         if other is not None and not other.is_kinematic() and not self.is_kinematic():
             warnings.warn("You are checking collisions of two non-kinematic bodies.")
