@@ -109,6 +109,18 @@ class MujocoElement(ABC):
         mujoco.mju_mat2Quat(quat, self._mojo.physics.bind(self.mjcf).xmat)
         return quat
 
+    def set_kinematic(self, value: bool):
+        if value and not self.is_kinematic():
+            self.mjcf.add("freejoint")
+            self._mojo.mark_dirty()
+        if (
+            not value
+            and self.is_kinematic()
+            and hasattr(self.mjcf, "freejoint")
+            and self.mjcf.freejoint is not None
+        ):
+            self.mjcf.freejoint.remove()
+
     def is_kinematic(self) -> bool:
         return _is_kinematic(self.mjcf)
 
