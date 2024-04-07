@@ -67,13 +67,6 @@ class Light(MujocoElement):
     def is_active(self) -> bool:
         return self.mjcf.active == "true"
 
-    def set_position(self, position: np.ndarray):
-        self._mojo.physics.bind(self.mjcf).pos = position
-        self.mjcf.pos = position
-
-    def get_position(self) -> np.ndarray:
-        return self._mojo.physics.bind(self.mjcf).pos
-
     def set_ambient(self, color: np.ndarray):
         self.mjcf.ambient = color
         self._mojo.physics.bind(self.mjcf).ambient = color

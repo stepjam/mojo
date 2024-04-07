@@ -3,7 +3,6 @@ from __future__ import annotations
 import warnings
 from typing import TYPE_CHECKING
 
-import mujoco
 import numpy as np
 from mujoco_utils import mjcf_utils
 from typing_extensions import Self
@@ -82,35 +81,6 @@ class Geom(MujocoElement):
 
         return Body(self._mojo, self.mjcf.parent)
 
-    def set_position(self, position: np.ndarray):
-        position = np.array(position)  # ensure is numpy array
-        if self.mjcf.parent.freejoint:
-            self._mojo.physics.bind(self.mjcf.parent.freejoint).qpos[:3] = position
-        self._mojo.physics.bind(self.mjcf).pos = position
-        self.mjcf.pos = position
-
-    def get_position(self) -> np.ndarray:
-        if self.mjcf.parent.freejoint:
-            return self._mojo.physics.bind(self.mjcf.parent.freejoint).qpos[:3].copy()
-        return self._mojo.physics.bind(self.mjcf).xpos
-
-    def set_quaternion(self, quaternion: np.ndarray):
-        # wxyz
-        quaternion = np.array(quaternion)  # ensure is numpy array
-        if self.mjcf.parent.freejoint is not None:
-            self._mojo.physics.bind(self.mjcf.parent.freejoint).qpos[3:] = quaternion
-        mat = np.zeros(9)
-        mujoco.mju_quat2Mat(mat, quaternion)
-        self._mojo.physics.bind(self.mjcf).xmat = mat
-        self.mjcf.quat = quaternion
-
-    def get_quaternion(self) -> np.ndarray:
-        if self.mjcf.parent.freejoint is not None:
-            return self._mojo.physics.bind(self.mjcf.parent.freejoint).qpos[3:].copy()
-        quat = np.zeros(4)
-        mujoco.mju_mat2Quat(quat, self._mojo.physics.bind(self.mjcf).xmat)
-        return quat
-
     def set_color(self, color: np.ndarray):
         color = np.array(color)
         if len(color) == 3:
@@ -183,13 +153,12 @@ class Geom(MujocoElement):
             and self._mojo.physics.bind(self.mjcf).conaffinity == 1
         )
 
-    def is_kinematic(self) -> bool:
-        return self.mjcf.parent.freejoint is not None or len(self.mjcf.parent.joint) > 0
-
     def set_kinematic(self, value: bool):
         if value and not self.is_kinematic():
             self.mjcf.parent.add("freejoint")
             self._mojo.mark_dirty()
+        if not value and self.is_kinematic() and self.mjcf.parent.freejoint is not None:
+            self.mjcf.parent.freejoint.remove()
 
     def has_collided(self, other: Geom = None):
         if other is not None and not other.is_kinematic() and not self.is_kinematic():
