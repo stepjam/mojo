@@ -18,6 +18,10 @@ class MujocoElement(ABC):
     def mjcf(self):
         return self._mjcf_elem
 
+    @property
+    def id(self):
+        return self._mojo.physics.bind(self.mjcf).element_id
+
     def __eq__(self, other):
         return (
             isinstance(other, MujocoElement)
