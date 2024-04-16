@@ -64,35 +64,6 @@ class Site(MujocoElement):
 
         return Body(self._mojo, self.mjcf.parent)
 
-    def set_position(self, position: np.ndarray):
-        position = np.array(position)  # ensure is numpy array
-        if self.mjcf.parent.freejoint:
-            self._mojo.physics.bind(self.mjcf.parent.freejoint).qpos[:3] = position
-        self._mojo.physics.bind(self.mjcf).pos = position
-        self.mjcf.pos = position
-
-    def get_position(self) -> np.ndarray:
-        if self.mjcf.parent.freejoint:
-            return self._mojo.physics.bind(self.mjcf.parent.freejoint).qpos[:3].copy()
-        return self._mojo.physics.bind(self.mjcf).xpos
-
-    def set_quaternion(self, quaternion: np.ndarray):
-        # wxyz
-        quaternion = np.array(quaternion)  # ensure is numpy array
-        if self.mjcf.parent.freejoint is not None:
-            self._mojo.physics.bind(self.mjcf.parent.freejoint).qpos[3:] = quaternion
-        mat = np.zeros(9)
-        mujoco.mju_quat2Mat(mat, quaternion)
-        self._mojo.physics.bind(self.mjcf).xmat = mat
-        self.mjcf.quat = quaternion
-
-    def get_quaternion(self) -> np.ndarray:
-        if self.mjcf.parent.freejoint is not None:
-            return self._mojo.physics.bind(self.mjcf.parent.freejoint).qpos[3:].copy()
-        quat = np.zeros(4)
-        mujoco.mju_mat2Quat(quat, self._mojo.physics.bind(self.mjcf).xmat)
-        return quat
-
     def set_matrix(self, matrix: np.ndarray):
         assert matrix.shape == (3, 3)
         self._mojo.physics.bind(self.mjcf).xmat = np.reshape(matrix, (9,))

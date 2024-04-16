@@ -59,31 +59,6 @@ class Body(MujocoElement):
         joints = self.mjcf.find_all("joint") or []
         return [joint.Joint(self._mojo, mjcf) for mjcf in joints]
 
-    def set_position(self, position: np.ndarray):
-        position = np.array(position)  # ensure is numpy array
-        if self.mjcf.freejoint is not None:
-            self._mojo.physics.bind(self.mjcf.freejoint).qpos[:3] = position
-        self._mojo.physics.bind(self.mjcf).pos = position
-        self.mjcf.pos = position
-
-    def get_position(self) -> np.ndarray:
-        if self.mjcf.freejoint is not None:
-            return self._mojo.physics.bind(self.mjcf.freejoint).qpos[:3].copy()
-        return self._mojo.physics.bind(self.mjcf).pos.copy()
-
-    def set_quaternion(self, quaternion: np.ndarray):
-        # wxyz
-        quaternion = np.array(quaternion)  # ensure is numpy array
-        if self.mjcf.freejoint is not None:
-            self._mojo.physics.bind(self.mjcf.freejoint).qpos[3:] = quaternion
-        self._mojo.physics.bind(self.mjcf).quat = quaternion
-        self.mjcf.quat = quaternion
-
-    def get_quaternion(self) -> np.ndarray:
-        if self.mjcf.freejoint is not None:
-            return self._mojo.physics.bind(self.mjcf.freejoint).qpos[3:].copy()
-        return self._mojo.physics.bind(self.mjcf).quat.copy()
-
     def set_euler(self, euler: np.ndarray):
         self.set_quaternion(
             quaternion.as_float_array(
@@ -98,14 +73,6 @@ class Body(MujocoElement):
     def set_texture(self, texture_path: str):
         for b in self.geoms:
             b.set_texture(texture_path)
-
-    def set_kinematic(self, value: bool):
-        if value and not self.is_kinematic():
-            self.mjcf.add("freejoint")
-            self._mojo.mark_dirty()
-
-    def is_kinematic(self) -> bool:
-        return self.mjcf.freejoint is not None
 
     def set_collidable(self, value: bool):
         for g in self.geoms:
@@ -123,3 +90,11 @@ class Body(MujocoElement):
         this_object_id = self._mojo.physics.bind(self.mjcf).element_id
         other_object_id = self._mojo.physics.bind(other.mjcf).element_id
         return has_collision(self._mojo.physics, other_object_id, this_object_id)
+
+    def remove(self):
+        self.mjcf.remove()
+
+    def set_kinematic(self, value: bool):
+        if value and not self.is_kinematic():
+            self.mjcf.add("freejoint")
+            self._mojo.mark_dirty()

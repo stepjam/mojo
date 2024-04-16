@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import mujoco
 import numpy as np
 from mujoco_utils import mjcf_utils
 from typing_extensions import Self
@@ -54,26 +53,6 @@ class Camera(MujocoElement):
         )
         mojo.mark_dirty()
         return Camera(mojo, new_camera)
-
-    def set_position(self, position: np.ndarray):
-        self._mojo.physics.bind(self.mjcf).pos = position
-        self.mjcf.pos = position
-
-    def get_position(self) -> np.ndarray:
-        return self._mojo.physics.bind(self.mjcf).pos.copy()
-
-    def set_quaternion(self, quaternion: np.ndarray):
-        # wxyz
-        quaternion = np.array(quaternion)  # ensure is numpy array
-        mat = np.zeros(9)
-        mujoco.mju_quat2Mat(mat, quaternion)
-        self._mojo.physics.bind(self.mjcf).xmat = mat
-        self.mjcf.quat = quaternion
-
-    def get_quaternion(self) -> np.ndarray:
-        quat = np.zeros(4)
-        mujoco.mju_mat2Quat(quat, self._mojo.physics.bind(self.mjcf).xmat)
-        return quat
 
     def set_focal(self, focal: np.ndarray):
         if self.mjcf.sensorsize is None:
