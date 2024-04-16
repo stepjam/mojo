@@ -30,7 +30,7 @@ def _find_freejoint(elem: mjcf.Element):
 
 
 class MujocoElement(ABC):
-    def __init__(self, mojo: Mojo, mjcf_elem: mjcf.RootElement):
+    def __init__(self, mojo: Mojo, mjcf_elem: mjcf.Element):
         self._mojo = mojo
         self._mjcf_elem = mjcf_elem
 
