@@ -57,10 +57,12 @@ class MujocoElement(ABC):
         quaternion = np.array(quaternion)  # ensure is numpy array
         if freejoint := _find_freejoint(self.mjcf):
             self._mojo.physics.bind(freejoint).qpos[3:] = quaternion
-        else:
-            mat = np.zeros(9)
-            mujoco.mju_quat2Mat(mat, quaternion)
-            self._mojo.physics.bind(self.mjcf).xmat = mat
+        binded = self._mojo.physics.bind(self.mjcf)
+        if binded.quat is not None:
+            binded.quat = quaternion
+        mat = np.zeros(9)
+        mujoco.mju_quat2Mat(mat, quaternion)
+        binded.xmat = mat
         self.mjcf.quat = quaternion
 
     def get_quaternion(self) -> np.ndarray:
