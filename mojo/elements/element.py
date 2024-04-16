@@ -38,10 +38,6 @@ class MujocoElement(ABC):
     def mjcf(self):
         return self._mjcf_elem
 
-    @property
-    def id(self):
-        return self._mojo.physics.bind(self.mjcf).element_id
-
     def set_position(self, position: np.ndarray):
         position = np.array(position)  # ensure is numpy array
         if freejoint := _find_freejoint(self.mjcf):
