@@ -90,3 +90,11 @@ class Body(MujocoElement):
         this_object_id = self._mojo.physics.bind(self.mjcf).element_id
         other_object_id = self._mojo.physics.bind(other.mjcf).element_id
         return has_collision(self._mojo.physics, other_object_id, this_object_id)
+
+    def remove(self):
+        self.mjcf.remove()
+
+    def set_kinematic(self, value: bool):
+        if value and not self.is_kinematic():
+            self.mjcf.add("freejoint")
+            self._mojo.mark_dirty()

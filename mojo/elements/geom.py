@@ -41,6 +41,7 @@ class Geom(MujocoElement):
         mesh_scale: np.ndarray = None,
         group: int = 1,
         density: float = 1000,
+        mass: float = None,
     ) -> Self:
         position = np.array([0, 0, 0]) if position is None else position
         quaternion = np.array([1, 0, 0, 0]) if quaternion is None else quaternion
@@ -57,6 +58,9 @@ class Geom(MujocoElement):
                 "To create mesh geom, 'mesh_file' must be defined "
                 "and 'geom_type' must be GeomType.MESH"
             )
+        kwargs = {}
+        if mass is not None:
+            kwargs["mass"] = mass
         new_geom = parent.mjcf.add(
             "geom",
             type=geom_type.value,
@@ -66,6 +70,7 @@ class Geom(MujocoElement):
             rgba=color,
             group=group,
             density=density,
+            **kwargs,
         )
         new_geom_obj = Geom(mojo, new_geom)
         if mesh_path:
@@ -104,7 +109,10 @@ class Geom(MujocoElement):
         color: np.ndarray = None,
     ):
         # First check if we have loaded this texture
-        key_name = f"{texture_path}_{mapping.value}"
+        key_name = (
+            f"{texture_path}_{mapping.value}_{tex_uniform}_{tex_repeat}_"
+            f"{emission}_{specular}_{shininess}_{reflectance}_{color}"
+        )
         material = self._mojo.get_material(key_name)
         if material is None:
             material = load_texture(
@@ -162,3 +170,8 @@ class Geom(MujocoElement):
         this_object_id = self._mojo.physics.bind(self.mjcf).element_id
         other_object_id = self._mojo.physics.bind(other.mjcf).element_id
         return has_collision(self._mojo.physics, other_object_id, this_object_id)
+
+    def set_kinematic(self, value: bool):
+        if value and not self.is_kinematic():
+            self.mjcf.parent.add("freejoint")
+            self._mojo.mark_dirty()
