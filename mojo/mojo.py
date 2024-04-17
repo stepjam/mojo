@@ -7,7 +7,7 @@ from dm_control import mjcf
 from mojo.elements.body import Body
 from mojo.elements.element import MujocoElement
 from mojo.elements.model import MujocoModel
-from mojo.elements.utils import AssetStore
+from mojo.elements.utils import AssetStore, resolve_freejoints
 
 
 class Mojo:
@@ -108,6 +108,7 @@ class Mojo:
         path: str,
         parent: MujocoElement = None,
         on_loaded: Optional[Callable[[mjcf.RootElement], None]] = None,
+        handle_freejoints: bool = False,
     ):
         """Load a Mujoco model from xml file and attach to specified parent element.
 
@@ -116,6 +117,8 @@ class Mojo:
         If None, it attaches to the root element.
         :param on_loaded: Optional callback to be executed after model is loaded.
         Use it to customize the Mujoco model before attaching it to the parent.
+        :param handle_freejoints: If true handles <freejoint/> elements.
+        Freejoint bodies will be re-parented to the worldbody.
         :return: A Body element representing the attached model.
         """
 
@@ -124,6 +127,11 @@ class Mojo:
             on_loaded(model_mjcf)
         attach_site = self.root_element.mjcf if parent is None else parent.mjcf
         attached_model_mjcf = attach_site.attach(model_mjcf)
+        if handle_freejoints:
+            root_model_mjcf = resolve_freejoints(
+                self.root_element.mjcf, attached_model_mjcf
+            )
+            self.root_element = MujocoElement(self, root_model_mjcf)
         self.mark_dirty()
         return Body(self, attached_model_mjcf)
 

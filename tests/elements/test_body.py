@@ -45,3 +45,10 @@ def test_get_set_kinematic(mojo: Mojo, body: Body):
     mojo.step()  # Objects should fall
     after = body.get_position()
     assert np.any(np.not_equal(before, after))
+
+
+def test_is_kinematic(mojo: Mojo, body: Body):
+    body.set_kinematic(True)
+    assert body.is_kinematic()
+    body.set_kinematic(False)
+    assert not body.is_kinematic()
