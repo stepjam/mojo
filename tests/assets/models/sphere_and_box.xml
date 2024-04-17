@@ -1,0 +1,13 @@
+<mujoco model="sphere_and_box">
+
+  <worldbody>
+    <body name="sphere">
+      <freejoint/>
+      <geom type="sphere" size="0.05 0.05 0.05"/>
+    </body>
+    <body name="cube">
+      <freejoint/>
+      <geom type="box" size="0.05 0.05 0.05"/>
+    </body>
+  </worldbody>
+</mujoco>

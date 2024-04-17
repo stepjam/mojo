@@ -20,6 +20,14 @@ def _is_kinematic(elem: mjcf.Element):
     return has_freejoint or has_joints or _is_kinematic(elem.parent)
 
 
+def _remove_all_joints(elem: mjcf.Element):
+    if hasattr(elem, "freejoint") and elem.freejoint is not None:
+        elem.freejoint.remove()
+    if hasattr(elem, "joint") and len(elem.joint) > 0:
+        for joint in elem.joint:
+            joint.remove()
+
+
 def _find_freejoint(elem: mjcf.Element):
     if elem.parent is None:
         # Root of tree
@@ -72,6 +80,9 @@ class MujocoElement(ABC):
 
     def is_kinematic(self) -> bool:
         return _is_kinematic(self.mjcf)
+
+    def remove_all_joints(self):
+        _remove_all_joints(self.mjcf)
 
     @property
     def id(self):
