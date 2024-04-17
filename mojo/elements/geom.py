@@ -176,5 +176,5 @@ class Geom(MujocoElement):
             self.mjcf.parent.add("freejoint")
             self._mojo.mark_dirty()
         elif not value and self.is_kinematic():
-            self.mjcf.parent.freejoint.remove()
+            self.parent.remove_all_joints()
             self._mojo.mark_dirty()
