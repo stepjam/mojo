@@ -98,3 +98,6 @@ class Body(MujocoElement):
         if value and not self.is_kinematic():
             self.mjcf.add("freejoint")
             self._mojo.mark_dirty()
+        elif not value and self.is_kinematic():
+            self.mjcf.freejoint.remove()
+            self._mojo.mark_dirty()
