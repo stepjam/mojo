@@ -3,6 +3,7 @@ from typing import Callable, Optional
 import mujoco.viewer
 import numpy as np
 from dm_control import mjcf
+from lxml import etree
 
 from mojo.elements.body import Body
 from mojo.elements.element import MujocoElement
@@ -108,6 +109,7 @@ class Mojo:
         path: str,
         parent: MujocoElement = None,
         on_loaded: Optional[Callable[[mjcf.RootElement], None]] = None,
+        handle_freejoints: bool = False,
     ):
         """Load a Mujoco model from xml file and attach to specified parent element.
 
@@ -116,6 +118,8 @@ class Mojo:
         If None, it attaches to the root element.
         :param on_loaded: Optional callback to be executed after model is loaded.
         Use it to customize the Mujoco model before attaching it to the parent.
+        :param handle_freejoints: If true handles <freejoint/> elements.
+        Freejoint bodies will be re-parented to the worldbody.
         :return: A Body element representing the attached model.
         """
 
@@ -124,6 +128,30 @@ class Mojo:
             on_loaded(model_mjcf)
         attach_site = self.root_element.mjcf if parent is None else parent.mjcf
         attached_model_mjcf = attach_site.attach(model_mjcf)
+        if handle_freejoints:
+            FREEJOINT = "freejoint"
+            WORLDBODY = "worldbody"
+            attached_xml = attached_model_mjcf.to_xml()
+            attached_freejoints = attached_xml.findall(f".//{FREEJOINT}")
+            if len(attached_freejoints) > 0:
+                root_xml = self.root_element.mjcf.to_xml()
+                worldbody = root_xml.find(WORLDBODY)
+                xpath_expr = f".//{attached_xml.tag}"
+                for attr_name, attr_value in attached_xml.attrib.items():
+                    xpath_expr += f"[@{attr_name}='{attr_value}']"
+                attached_xml = root_xml.find(xpath_expr)
+                freejoints = attached_xml.findall(f".//{FREEJOINT}")
+                for freejoint in freejoints:
+                    worldbody.append(freejoint.getparent())
+                if len(attached_xml) == 0:
+                    attached_xml.getparent().remove(attached_xml)
+
+                root_model = mjcf.from_xml_string(
+                    etree.tostring(root_xml),
+                    escape_separators=True,
+                    assets=self.root_element.mjcf.get_assets(),
+                )
+                self.root_element = MujocoElement(self, root_model)
         self.mark_dirty()
         return Body(self, attached_model_mjcf)
 
