@@ -46,10 +46,14 @@ class MujocoElement(ABC):
     def mjcf(self):
         return self._mjcf_elem
 
-    def set_position(self, position: np.ndarray):
+    def set_position(self, position: np.ndarray, reset_dynamics: bool = True):
         position = np.array(position)  # ensure is numpy array
         if freejoint := _find_freejoint(self.mjcf):
-            self._mojo.physics.bind(freejoint).qpos[:3] = position
+            freejoint = self._mojo.physics.bind(freejoint)
+            freejoint.qpos[:3] = position
+            if reset_dynamics:
+                freejoint.qvel *= 0
+                freejoint.qacc *= 0
         else:
             self._mojo.physics.bind(self.mjcf).pos = position
         self.mjcf.pos = position
@@ -60,11 +64,15 @@ class MujocoElement(ABC):
             return self._mojo.physics.bind(freejoint).qpos[:3].copy()
         return self._mojo.physics.bind(self.mjcf).xpos.copy()
 
-    def set_quaternion(self, quaternion: np.ndarray):
+    def set_quaternion(self, quaternion: np.ndarray, reset_dynamics: bool = True):
         # wxyz
         quaternion = np.array(quaternion)  # ensure is numpy array
         if freejoint := _find_freejoint(self.mjcf):
-            self._mojo.physics.bind(freejoint).qpos[3:] = quaternion
+            freejoint = self._mojo.physics.bind(freejoint)
+            freejoint.qpos[3:] = quaternion
+            if reset_dynamics:
+                freejoint.qvel *= 0
+                freejoint.qacc *= 0
         binded = self._mojo.physics.bind(self.mjcf)
         if binded.quat is not None:
             binded.quat = quaternion
