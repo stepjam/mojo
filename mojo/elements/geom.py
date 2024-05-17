@@ -161,8 +161,12 @@ class Geom(MujocoElement):
             and self._mojo.physics.bind(self.mjcf).conaffinity == 1
         )
 
-    def has_collided(self, other: Geom = None):
-        if other is not None and not other.is_kinematic() and not self.is_kinematic():
+    def has_collided(self, other: Geom = None, warn: bool = True):
+        if (
+            warn
+            and other is not None
+            and (not other.is_kinematic() and not self.is_kinematic())
+        ):
             warnings.warn("You are checking collisions of two non-kinematic bodies.")
         # If None, return true if there is any contact
         if other is None:
