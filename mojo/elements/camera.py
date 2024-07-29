@@ -7,18 +7,18 @@ from mujoco_utils import mjcf_utils
 from typing_extensions import Self
 
 from mojo.elements import Body
-from mojo.elements.element import MujocoElement
+from mojo.elements.element import TransformElement
 
 if TYPE_CHECKING:
     from mojo import Mojo
 
 
-class Camera(MujocoElement):
+class Camera(TransformElement):
     @staticmethod
     def get(
         mojo: Mojo,
         name: str,
-        parent: MujocoElement = None,
+        parent: TransformElement = None,
     ) -> Self:
         root_mjcf = mojo.root_element.mjcf if parent is None else parent.mjcf
         mjcf = mjcf_utils.safe_find(root_mjcf, "camera", name)
@@ -27,7 +27,7 @@ class Camera(MujocoElement):
     @staticmethod
     def create(
         mojo: Mojo,
-        parent: MujocoElement = None,
+        parent: TransformElement = None,
         position: np.ndarray = None,
         quaternion: np.ndarray = None,
         fovy: float = None,

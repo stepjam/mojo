@@ -9,19 +9,19 @@ from mujoco_utils import mjcf_utils
 from typing_extensions import Self
 
 from mojo.elements import geom, joint
-from mojo.elements.element import MujocoElement
+from mojo.elements.element import TransformElement
 from mojo.elements.utils import has_collision
 
 if TYPE_CHECKING:
     from mojo import Mojo
 
 
-class Body(MujocoElement):
+class Body(TransformElement):
     @staticmethod
     def get(
         mojo: Mojo,
         name: str,
-        parent: MujocoElement = None,
+        parent: TransformElement = None,
     ) -> Self:
         root_mjcf = mojo.root_element.mjcf if parent is None else parent.mjcf
         mjcf = mjcf_utils.safe_find(root_mjcf, "body", name)
@@ -30,7 +30,7 @@ class Body(MujocoElement):
     @staticmethod
     def create(
         mojo: Mojo,
-        parent: MujocoElement = None,
+        parent: TransformElement = None,
         position: np.ndarray = None,
         quaternion: np.ndarray = None,
     ) -> Self:

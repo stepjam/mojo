@@ -4,10 +4,10 @@ import numpy as np
 from mujoco_utils import mjcf_utils
 
 from mojo.elements.body import Body
-from mojo.elements.element import MujocoElement
+from mojo.elements.element import TransformElement
 
 
-class MujocoModel(MujocoElement):
+class MujocoModel(TransformElement):
     @property
     def bodies(self) -> list[Body]:
         # Loop through all children

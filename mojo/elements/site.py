@@ -9,7 +9,7 @@ from typing_extensions import Self
 
 from mojo.elements import body
 from mojo.elements.consts import SiteType, TextureMapping
-from mojo.elements.element import MujocoElement
+from mojo.elements.element import TransformElement
 from mojo.elements.utils import load_texture
 
 if TYPE_CHECKING:
@@ -17,12 +17,12 @@ if TYPE_CHECKING:
     from mojo.elements.body import Body
 
 
-class Site(MujocoElement):
+class Site(TransformElement):
     @staticmethod
     def get(
         mojo: Mojo,
         name: str,
-        parent: MujocoElement = None,
+        parent: TransformElement = None,
     ) -> Self:
         root_mjcf = mojo.root_element.mjcf if parent is None else parent.mjcf
         mjcf = mjcf_utils.safe_find(root_mjcf, "site", name)

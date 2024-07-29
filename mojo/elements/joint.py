@@ -8,18 +8,18 @@ from typing_extensions import Self
 
 from mojo.elements import body
 from mojo.elements.consts import JointType
-from mojo.elements.element import MujocoElement
+from mojo.elements.element import TransformElement
 
 if TYPE_CHECKING:
     from mojo import Mojo
 
 
-class Joint(MujocoElement):
+class Joint(TransformElement):
     @staticmethod
     def get(
         mojo: Mojo,
         name: str,
-        parent: MujocoElement = None,
+        parent: TransformElement = None,
     ) -> Self:
         root_mjcf = mojo.root_element.mjcf if parent is None else parent.mjcf
         mjcf = mjcf_utils.safe_find(root_mjcf, "joint", name)
@@ -35,6 +35,7 @@ class Joint(MujocoElement):
         joint_type: JointType = JointType.HINGE,
         stiffness: float = 0,
         springref: float = 0,
+        name: str = None,
     ) -> Self:
         position = np.array([0, 0, 0]) if position is None else position
         axis = np.array([1, 0, 0]) if axis is None else axis
@@ -48,6 +49,7 @@ class Joint(MujocoElement):
             range=range,
             stiffness=stiffness,
             springref=springref,
+            name=name,
         )
         mojo.mark_dirty()
         return Joint(mojo, new_geom)

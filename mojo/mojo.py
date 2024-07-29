@@ -1,11 +1,19 @@
+import re
 from typing import Callable, Optional
 
 import mujoco.viewer
 import numpy as np
 from dm_control import mjcf
 
+from mojo.elements.actuators import (
+    Actuator,
+    GeneralActuator,
+    MotorActuator,
+    PositionActuator,
+    VelocityActuator,
+)
 from mojo.elements.body import Body
-from mojo.elements.element import MujocoElement
+from mojo.elements.element import TransformElement
 from mojo.elements.model import MujocoModel
 from mojo.elements.utils import AssetStore, resolve_freejoints
 
@@ -49,6 +57,21 @@ class Mojo:
         if self._dirty:
             self._create_physics_from_model()
         return self._physics.data.ptr
+
+    @property
+    def actuators(self) -> list[Actuator]:
+        act_root = self.root_element.mjcf.actuator
+        actuators_to_return = []
+        for act_class, attrib_name in [
+            (GeneralActuator, "general"),
+            (MotorActuator, "motor"),
+            (PositionActuator, "position"),
+            (VelocityActuator, "velocity"),
+        ]:
+            for act in getattr(act_root, attrib_name):
+                mojo_act = act_class(self, act)
+                actuators_to_return.append(mojo_act)
+        return actuators_to_return
 
     def set_timestep(self, timestep: float):
         self.root_element.mjcf.option.timestep = timestep
@@ -106,7 +129,7 @@ class Mojo:
     def load_model(
         self,
         path: str,
-        parent: MujocoElement = None,
+        parent: TransformElement = None,
         on_loaded: Optional[Callable[[mjcf.RootElement], None]] = None,
         handle_freejoints: bool = False,
     ):
@@ -131,7 +154,7 @@ class Mojo:
             root_model_mjcf = resolve_freejoints(
                 self.root_element.mjcf, attached_model_mjcf
             )
-            self.root_element = MujocoElement(self, root_model_mjcf)
+            self.root_element = TransformElement(self, root_model_mjcf)
         self.mark_dirty()
         return Body(self, attached_model_mjcf)
 
@@ -152,4 +175,12 @@ class Mojo:
         self.mark_dirty()
 
     def __str__(self):
-        return self.root_element.mjcf.to_xml_string()
+        xml = self.root_element.mjcf.to_xml_string()
+
+        # Match the <mesh> tags and remove the hash from the file parameter
+        pattern = r'(<mesh[^>]*file=")([^"]+)-[a-fA-F0-9]{40}(\.STL")'
+
+        # Replace the matched pattern with the modified file parameter
+        modified_xml = re.sub(pattern, r"\1\2\3", xml)
+
+        return modified_xml
