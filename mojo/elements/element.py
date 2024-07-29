@@ -20,6 +20,14 @@ def _is_kinematic(elem: mjcf.Element):
     return has_freejoint or has_joints or _is_kinematic(elem.parent)
 
 
+def _remove_all_joints(elem: mjcf.Element):
+    if hasattr(elem, "freejoint") and elem.freejoint is not None:
+        elem.freejoint.remove()
+    if hasattr(elem, "joint") and len(elem.joint) > 0:
+        for joint in elem.joint:
+            joint.remove()
+
+
 def _find_freejoint(elem: mjcf.Element):
     if elem.parent is None:
         # Root of tree
@@ -37,6 +45,56 @@ class MujocoElement(ABC):
     @property
     def mjcf(self):
         return self._mjcf_elem
+
+    def set_position(self, position: np.ndarray, reset_dynamics: bool = True):
+        position = np.array(position)  # ensure is numpy array
+        if freejoint := _find_freejoint(self.mjcf):
+            freejoint = self._mojo.physics.bind(freejoint)
+            freejoint.qpos[:3] = position
+            if reset_dynamics:
+                freejoint.qvel *= 0
+                freejoint.qacc *= 0
+        else:
+            self._mojo.physics.bind(self.mjcf).pos = position
+        self.mjcf.pos = position
+
+    def get_position(self) -> np.ndarray:
+        # if the element has a free joint (and thus is a body), then access qpos
+        if freejoint := _find_freejoint(self.mjcf):
+            return self._mojo.physics.bind(freejoint).qpos[:3].copy()
+        return self._mojo.physics.bind(self.mjcf).xpos.copy()
+
+    def set_quaternion(self, quaternion: np.ndarray, reset_dynamics: bool = True):
+        # wxyz
+        quaternion = np.array(quaternion)  # ensure is numpy array
+        if freejoint := _find_freejoint(self.mjcf):
+            freejoint = self._mojo.physics.bind(freejoint)
+            freejoint.qpos[3:] = quaternion
+            if reset_dynamics:
+                freejoint.qvel *= 0
+                freejoint.qacc *= 0
+        binded = self._mojo.physics.bind(self.mjcf)
+        if binded.quat is not None:
+            binded.quat = quaternion
+        mat = np.zeros(9)
+        mujoco.mju_quat2Mat(mat, quaternion)
+        binded.xmat = mat
+        self.mjcf.quat = quaternion
+
+    def get_quaternion(self) -> np.ndarray:
+        quat = np.zeros(4)
+        mujoco.mju_mat2Quat(quat, self._mojo.physics.bind(self.mjcf).xmat)
+        return quat
+
+    def is_kinematic(self) -> bool:
+        return _is_kinematic(self.mjcf)
+
+    def remove_all_joints(self):
+        _remove_all_joints(self.mjcf)
+
+    @property
+    def id(self):
+        return self._mojo.physics.bind(self.mjcf).element_id
 
     def set_position(self, position: np.ndarray):
         position = np.array(position)  # ensure is numpy array
@@ -57,12 +115,10 @@ class MujocoElement(ABC):
         quaternion = np.array(quaternion)  # ensure is numpy array
         if freejoint := _find_freejoint(self.mjcf):
             self._mojo.physics.bind(freejoint).qpos[3:] = quaternion
-        binded = self._mojo.physics.bind(self.mjcf)
-        if binded.quat is not None:
-            binded.quat = quaternion
-        mat = np.zeros(9)
-        mujoco.mju_quat2Mat(mat, quaternion)
-        binded.xmat = mat
+        else:
+            mat = np.zeros(9)
+            mujoco.mju_quat2Mat(mat, quaternion)
+            self._mojo.physics.bind(self.mjcf).xmat = mat
         self.mjcf.quat = quaternion
 
     def get_quaternion(self) -> np.ndarray:

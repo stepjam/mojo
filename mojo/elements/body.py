@@ -81,8 +81,12 @@ class Body(MujocoElement):
     def is_collidable(self) -> bool:
         return len(self.geoms) > 0 and self.geoms[0].is_collidable()
 
-    def has_collided(self, other: Body = None):
-        if other is not None and (not other.is_kinematic() and not self.is_kinematic()):
+    def has_collided(self, other: Body = None, warn: bool = True):
+        if (
+            warn
+            and other is not None
+            and (not other.is_kinematic() and not self.is_kinematic())
+        ):
             warnings.warn("You are checking collisions of two non-kinematic bodies.")
         # If None, return true if there is any contact
         if other is None:
@@ -97,4 +101,7 @@ class Body(MujocoElement):
     def set_kinematic(self, value: bool):
         if value and not self.is_kinematic():
             self.mjcf.add("freejoint")
+            self._mojo.mark_dirty()
+        elif not value and self.is_kinematic():
+            self.remove_all_joints()
             self._mojo.mark_dirty()

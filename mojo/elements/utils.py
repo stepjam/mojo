@@ -5,11 +5,14 @@ from typing import Optional
 
 import numpy as np
 from dm_control import mjcf
+from lxml import etree
 
 from mojo.elements.consts import TextureMapping
 
 # Default minimum distance between two geoms for them to be considered in collision.
 _DEFAULT_COLLISION_MARGIN: float = 1e-8
+_FREEJOINT_TAG = "freejoint"
+_WORLDBODY_TAG = "worldbody"
 
 
 def has_collision(
@@ -75,6 +78,30 @@ def load_mesh(
     uid = str(uuid.uuid4())
     mesh = mjcf_model.asset.add("mesh", name=f"mesh_{uid}", file=path, scale=scale)
     return mesh
+
+
+def resolve_freejoints(
+    root_model: mjcf.RootElement, model: mjcf.RootElement
+) -> mjcf.RootElement:
+    child_xml = model.to_xml()
+    if len(child_xml.findall(f".//{_FREEJOINT_TAG}")) > 0:
+        root_xml = root_model.to_xml()
+        worldbody = root_xml.find(_WORLDBODY_TAG)
+        search_expr = f".//{child_xml.tag}"
+        for attr_name, attr_value in child_xml.attrib.items():
+            search_expr += f"[@{attr_name}='{attr_value}']"
+        child_xml = root_xml.find(search_expr)
+        freejoints = child_xml.findall(f".//{_FREEJOINT_TAG}")
+        for joint in freejoints:
+            worldbody.append(joint.getparent())
+        if len(child_xml) == 0:
+            child_xml.getparent().remove(child_xml)
+        root_model = mjcf.from_xml_string(
+            etree.tostring(root_xml),
+            escape_separators=True,
+            assets=root_model.get_assets(),
+        )
+    return root_model
 
 
 class AssetStore:
