@@ -7,10 +7,10 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.10'
 # TODO: Enable once documentation added
@@ -20,6 +20,6 @@ jobs:
       - name: Tests
         run: |
           sudo apt-get update
-          sudo apt-get install libgl1-mesa-dev libxinerama-dev libxcursor-dev libxrandr-dev libxi-dev
+          sudo apt-get install -y libgl1-mesa-dev libxinerama-dev libxcursor-dev libxrandr-dev libxi-dev
           pip install ".[dev]"
-          pytest tests/
+          pytest -sv tests/
