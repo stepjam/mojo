@@ -29,13 +29,33 @@ core_requirements = [
 
 setuptools.setup(
     version=get_version("mojo/__init__.py"),
-    name="mojo",
+    name="mojo-mujoco-wrapper",
     author="Stephen James",
     author_email="stepjamuk@gmail.com",
+    description=(
+        "Python wrapper for building and controlling MuJoCo physics simulations."
+    ),
+    long_description=read("README.md"),
+    long_description_content_type="text/markdown",
+    url="https://github.com/stepjam/mojo",
+    license="MIT",
     packages=setuptools.find_packages(),
     python_requires=">=3.10",
     install_requires=core_requirements,
     extras_require={
         "dev": ["pre-commit", "pytest"],
     },
+    classifiers=[
+        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Science/Research",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Topic :: Scientific/Engineering :: Physics",
+        "Topic :: Scientific/Engineering :: Artificial Intelligence",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+    ],
 )
