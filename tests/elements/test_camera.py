@@ -53,6 +53,7 @@ def test_get_set_sensor_size(mojo: Mojo, camera: Camera):
 
 def test_get_set_focal_pixel(mojo: Mojo, camera: Camera):
     expected_focal_pixel = np.array([400, 400], dtype=np.float64)
+    camera.set_sensor_size(np.array([0.036, 0.024]))
     camera.set_focal_pixel(expected_focal_pixel)
     mojo.step()  # This will recompile physics to check xml is correctly parsed
     assert_array_equal(camera.get_focal_pixel(), expected_focal_pixel)
