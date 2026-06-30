@@ -20,11 +20,11 @@ def get_version(rel_path):
 
 
 core_requirements = [
-    "mujoco",
-    "numpy",
-    "dm_control",
-    "mujoco_utils",
-    "numpy-quaternion",
+    "mujoco>=2.3.3",
+    "numpy>=1.26",
+    "dm_control>=1.0.0",
+    "mujoco_utils>=0.0.6",
+    "numpy-quaternion>=2024.0.13",
 ]
 
 setuptools.setup(
